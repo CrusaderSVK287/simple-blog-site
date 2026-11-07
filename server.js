@@ -6,12 +6,53 @@ const path = require("path");
 
 const app = express();
 
-
-const html = fs.readFileSync("public/index.html");
 const options = {
     key: fs.readFileSync("key.pem"),
     cert: fs.readFileSync("cert.pem")
 };
+
+app.use(express.json());
+
+let comments = [
+    {
+        id: 1,
+        username: "Alice",
+        body: "Really nice blog post!"
+    },
+    {
+        id: 2,
+        username: "Bob",
+        body: "Looking forward to reading more."
+    }
+];
+
+let nextCommentId = 3;
+
+app.get("/api/comments", (req, res) => {
+    res.status(200).json(comments);
+})
+
+app.post("/api/comments", (req, res) => {
+    const { username, body } = req.body;
+
+    if (!username || !body) {
+        return res.status(400).json({
+            error: "Username and comment are required."
+        });
+    }
+
+    const comment = {
+        id: nextCommentId++,
+        username: username,
+        body: body
+    };
+
+    comments.push(comment);
+
+    res.status(201).json(comment);
+})
+
+
 
 const httpApp = express();
 httpApp.use((req, res) => {
