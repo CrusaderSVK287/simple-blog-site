@@ -2,10 +2,12 @@ const http = require("http");
 const https = require("https")
 const fs = require("fs");
 const express = require("express");
+const path = require("path");
 
 const app = express();
 
-const html = fs.readFileSync("index.html");
+
+const html = fs.readFileSync("public/index.html");
 const options = {
     key: fs.readFileSync("key.pem"),
     cert: fs.readFileSync("cert.pem")
@@ -16,9 +18,7 @@ httpApp.use((req, res) => {
     res.redirect(301, `https://localhost:8443${req.originalUrl}`);
 })
 
-app.get("/" ,(req, res) => {
-    res.type("html").send(html);
-})
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use((req, res) => {
     res.status(404).type("text").send("Not Found");
