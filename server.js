@@ -1,6 +1,9 @@
 const http = require("http");
-const https = require("https");
+const https = require("https")
 const fs = require("fs");
+const express = require("express");
+
+const app = express();
 
 const html = fs.readFileSync("index.html");
 const options = {
@@ -8,26 +11,23 @@ const options = {
     cert: fs.readFileSync("cert.pem")
 };
 
-http.createServer((req, res) => {
-    res.writeHead(301, {
-        "Location": "https://localhost:8443" + req.url
-    });
-    res.end();
-}).listen(8000);
+const httpApp = express();
+httpApp.use((req, res) => {
+    res.redirect(301, `https://localhost:8443${req.originalUrl}`);
+})
 
-https.createServer(options, (req, res) => {
-    if (req.method === "GET" && req.url === "/") {
-        res.writeHead(200, {
-            "Content-Type": "text/html"
-        });
-        res.end(html);
-    } else {
-        res.writeHead(404, {
-            "Content-Type": "text/plain"
-        });
-        res.end("Not Found");
-    }
-}).listen(8443);
+app.get("/" ,(req, res) => {
+    res.type("html").send(html);
+})
 
-console.log("HTTP server running on port 8000");
-console.log("HTTPS server running on port 8443");
+app.use((req, res) => {
+    res.status(404).type("text").send("Not Found");
+});
+
+http.createServer(httpApp).listen(8000, () => {
+    console.log("HTTP server running on port 8000");
+})
+
+https.createServer(options, app).listen(8443, () => {
+    console.log("HTTPS server running on port 8443");
+});
