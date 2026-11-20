@@ -3,6 +3,7 @@ const http = require("http");
 const https = require("https");
 const fs = require("fs");
 const path = require("path");
+const sqlite3 = require("sqlite3").verbose();
 
 const app = express();
 
@@ -13,45 +14,77 @@ const options = {
 
 app.use(express.json());
 
-let comments = [
-    {
-        id: 1,
-        username: "Alice",
-        body: "Really nice blog post!"
-    },
-    {
-        id: 2,
-        username: "Bob",
-        body: "Looking forward to reading more."
-    }
-];
+// Connect to SQLite database
+const db = new sqlite3.Database(
+    path.join(__dirname, "comments.db")
+);
 
-let nextCommentId = 3;
+// Create comments table if it does not exist
+db.run(`
+    CREATE TABLE IF NOT EXISTS comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        author TEXT NOT NULL,
+        content TEXT NOT NULL,
+        age TEXT NOT NULL
+    )
+`, (error) => {
+    if (error) {
+        console.error("Could not create comments table:", error);
+    }
+});
 
 // GET - Retrieve all comments
 app.get("/api/comments", (req, res) => {
-    res.status(200).json(comments);
+    db.all(
+        "SELECT * FROM comments ORDER BY id ASC",
+        [],
+        (error, rows) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).json({
+                    error: "Could not retrieve comments."
+                });
+            }
+
+            res.status(200).json(rows);
+        }
+    );
 });
 
 // POST - Create a new comment
 app.post("/api/comments", (req, res) => {
-    const { username, body } = req.body;
+    const { author, content } = req.body;
 
-    if (!username || !body) {
+    if (
+        typeof author !== "string" ||
+        typeof content !== "string" ||
+        !author.trim() ||
+        !content.trim()
+    ) {
         return res.status(400).json({
-            error: "Username and comment are required."
+            error: "Author and comment are required."
         });
     }
 
-    const comment = {
-        id: nextCommentId++,
-        username: username,
-        body: body
-    };
+    const age = new Date().toISOString();
 
-    comments.push(comment);
+    db.run(
+        `INSERT INTO comments (author, content, age)
+        VALUES (?, ?, ?)`,
+        [author.trim(), content.trim(), age],
+        (error) => {
+            if (error) {
+                console.error(error);
+                return res.status(500).json({
+                    error: "Could not save comment."
+                });
+            }
 
-    res.status(201).json(comment);
+            res.status(201).json({
+                message: "Comment saved."
+            });
+        }
+    );
 });
 
 // Serve frontend

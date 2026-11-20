@@ -22,3 +22,14 @@ By the end, know how to create endpoints and test them using a browser or an API
 ```
 npm install express
 ```
+
+## Lecture 3 — real persistent database access
+
+```
+npm install sqlite3
+
+
+npm install-scripts approve sqlite3
+npm i
+npm rebuild sqlite3
+```
