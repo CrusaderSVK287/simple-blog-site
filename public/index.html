@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,14 +6,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>My Blog</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-<main>
+<!-- Login overlay -->
+<div id="login-overlay" class="login-overlay">
+
+    <section class="login-box">
+        <h2 id="auth-title">Log in</h2>
+
+        <form id="auth-form">
+
+            <label for="username">Username</label>
+            <input
+                type="text"
+                id="username"
+                required
+            >
+
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                required
+            >
+
+            <button type="submit" id="auth-submit">
+                Log in
+            </button>
+
+        </form>
+
+        <p id="auth-status" class="status"></p>
+
+        <button type="button" id="auth-toggle" class="secondary-button">
+            Need an account? Register
+        </button>
+    </section>
+
+</div>
+
+<!-- Blog -->
+<main id="app" hidden>
 
     <article class="post">
+
+        <div class="account-bar">
+            <span id="current-user"></span>
+            <button type="button" id="logout-button">Log out</button>
+        </div>
+
         <h1>My Blog</h1>
 
         <p>
@@ -21,6 +66,7 @@
             Integer non turpis sed nisl consequat tincidunt.
             Donec vel justo eget nulla consequat tincidunt.
         </p>
+
     </article>
 
     <section class="comments">
@@ -36,18 +82,10 @@
 
         <form id="comment-form">
 
-            <label for="author">Author</label>
-            <input
-                type="text"
-                id="author"
-                name="author"
-                required
-            >
-
             <label for="content">Comment</label>
+
             <textarea
                 id="content"
-                name="content"
                 rows="4"
                 required
             ></textarea>
